@@ -1,25 +1,33 @@
 <?php
-require_once 'functions.php';
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
+$peopleFile = 'people.json';
+$people = [];
+if (file_exists($peopleFile)) {
+    $jsonData = file_get_contents($peopleFile);
+    $people = json_decode($jsonData, true) ?? [];
 }
-$result = $conn->query("SELECT * FROM persone ORDER BY cognome, nome");
-echo "<h2>Elenco Persone</h2>";
-echo "<table border='1'>
-<tr><th>Codice Fiscale</th><th>Nome</th><th>Cognome</th><th>Data Nascita</th><th>Azioni</th></tr>";
-while ($row = $result->fetch_assoc()) {
-    echo "<tr>
-        <td>{$row['codice_fiscale']}</td>
-        <td>{$row['nome']}</td>
-        <td>{$row['cognome']}</td>
-        <td>{$row['data_nascita']}</td>
-        <td>
-            <a href='edit_person.php?id={$row['id']}'>Modifica</a> | 
-            <a href='delete_person.php?id={$row['id']}'>Elimina</a>
-        </td>
-    </tr>";
-}
-echo "</table>";
 ?>
+<h2>Elenco Persone</h2>
+<a href="add_person.php">➕ Aggiungi Persona</a>
+<br><br>
+<?php if (empty($people)): ?>
+    <p>Nessuna persona trovata.</p>
+<?php else: ?>
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Azioni</th>
+        </tr>
+        <?php foreach ($people as $p): ?>
+            <tr>
+                <td><?php echo htmlspecialchars($p['id']); ?></td>
+                <td><?php echo htmlspecialchars($p['name']); ?></td>
+                <td><?php echo htmlspecialchars($p['email']); ?></td>
+                <td>
+                    <a href="edit_person.php?id=<?php echo urlencode($p['id']); ?>">✏️ Modifica</a>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+<?php endif; ?>
